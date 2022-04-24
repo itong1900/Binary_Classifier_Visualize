@@ -90,10 +90,7 @@ def main():
     elif mode == "Classifier":
         st.header("Train and test the data")
 
-        if 'raw_data' not in st.session_state:
-            st.write("save raw data config first")
-
-        train_size = st.slider("Pick Training Size", min_value=0.0, max_value=1.0, value=0.7)
+        train_size = st.slider("Pick Training Size", min_value=0.0, max_value=1.0, value=st.session_state.train_size if 'train_size' in st.session_state else 0.7)
 
         ## preprocess data
         permuted_data = st.session_state.raw_data.sample(frac = 1, random_state = 100).reset_index(drop = True)
@@ -127,11 +124,14 @@ def main():
         st.header("Metrics")
         decision_threshold = st.slider("Threshold: ", 0.0, 1.0, 0.5)
 
-        obj = binary_classifier_tool(st.session_state.y_pred, st.session_state.y_test, step_size = 0.01)
+        
+        obj = binary_classifier_tool(st.session_state.y_pred, st.session_state.y_test, step_size = 0.001)
         obj.metrics_precompute()
+        col1, col2, col3 = st.columns(3)
         st.plotly_chart(obj.plot_all_in_one_graph(threshold = decision_threshold), use_container_width=False)
-        st.plotly_chart(obj.plot_ROC(threshold = decision_threshold), use_container_width=False)
-        st.plotly_chart(obj.plot_PR_Curve(threshold = decision_threshold), use_container_width=False)
+        
+        col2.plotly_chart(obj.plot_ROC(threshold = decision_threshold), use_container_width=False)
+        col3.plotly_chart(obj.plot_PR_Curve(threshold = decision_threshold), use_container_width=False)
 
 
         TP_num, FP_num, TN_num, FN_num, precision, recall, FPR, ABC, w_l, w_r = obj.get_CM_metrics(threshold=decision_threshold)

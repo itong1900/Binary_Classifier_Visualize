@@ -9,7 +9,7 @@ from sklearn.metrics import roc_curve
 from sklearn.metrics import precision_recall_curve
 
 class binary_classifier_tool:
-    def __init__(self, y_pred, y_ground_truth, step_size = 0.1):
+    def __init__(self, y_pred, y_ground_truth, step_size = 0.01):
         self.y_pred = y_pred
         self.y_ground_truth = y_ground_truth
         self.step_size = step_size
@@ -50,83 +50,98 @@ class binary_classifier_tool:
 
 
     def plot_all_in_one_graph(self, threshold = 0.5):
-        cdf_cutoff = math.floor(threshold/self.step_size)
-        fig = px.line(y=self.class_0_cdf_from_bottom[:cdf_cutoff], x = np.arange(0, threshold, self.step_size),  width=600, height=600)
-        fig.add_trace(
-            go.Scatter(
-                name="trend_from_lower",
-                x=np.arange(threshold, 1.000001, self.step_size),
-                y=self.class_0_cdf_from_bottom[cdf_cutoff:],
-                mode="lines",
-                line={'color': 'grey'},
-                showlegend=False)
-            )
-        fig.add_trace(
-            go.Scatter(
-                name="upper half",
-                x=np.arange(threshold, 1.00001, self.step_size),
-                y=self.class_0_cdf_from_top[cdf_cutoff: ],
-                mode="lines",
-                line={'color': 'blue'},
-                showlegend=False)
-            )
-        fig.add_trace(
-            go.Scatter(
-                name="trend_from_upper",
-                x=np.arange(0, threshold, self.step_size),
-                y=self.class_0_cdf_from_top[:cdf_cutoff],
-                mode="lines",
-                line={'color': 'grey'},
-                showlegend=False)
-            )
+        fig = px.scatter(self.auxilary_df,
+                 width=600, height=800,
+                 x="y_pred",
+                 y="y_ground_truth",
+                 color="y_ground_truth",
+                 marginal_x="histogram",  # plot on x-axis margin
+                 title="Scatter plot with margin plots")
+        # cdf_cutoff = math.floor(threshold/self.step_size)
+        # fig.add_trace(
+        #     go.Scatter(
+        #         name="trend_from_lower",
+        #         x=np.arange(0, threshold, self.step_size),
+        #         y=self.class_0_cdf_from_bottom[:cdf_cutoff],
+        #         mode="lines",
+        #         line={'color': 'blue'},
+        #         showlegend=False)
+        #     )   #px.line(y=self.class_0_cdf_from_bottom[:cdf_cutoff], x = np.arange(0, threshold, self.step_size),  width=400, height=400)
+        # fig.add_trace(
+        #     go.Scatter(
+        #         name="trend_from_lower",
+        #         x=np.arange(threshold, 1.000001, self.step_size),
+        #         y=self.class_0_cdf_from_bottom[cdf_cutoff:],
+        #         mode="lines",
+        #         line={'color': 'grey'},
+        #         showlegend=False)
+        #     )
+        # fig.add_trace(
+        #     go.Scatter(
+        #         name="upper half",
+        #         x=np.arange(threshold, 1.00001, self.step_size),
+        #         y=self.class_0_cdf_from_top[cdf_cutoff: ],
+        #         mode="lines",
+        #         line={'color': 'blue'},
+        #         showlegend=False)
+        #     )
+        # fig.add_trace(
+        #     go.Scatter(
+        #         name="trend_from_upper",
+        #         x=np.arange(0, threshold, self.step_size),
+        #         y=self.class_0_cdf_from_top[:cdf_cutoff],
+        #         mode="lines",
+        #         line={'color': 'grey'},
+        #         showlegend=False)
+        #     )
         
-        fig.add_trace(
-            go.Scatter(
-                name="Boundaries",
-                x=[1, 1, None, -0.2, 1.2, None, 0, 0, None, 0, 1],
-                y=[0, 1, None, 0, 0, None, -0.2, 1.2, None, 1, 1],
-                mode="lines",
-                line=go.scatter.Line(color="purple"),
-                showlegend=False)
-            )
+        # fig.add_trace(
+        #     go.Scatter(
+        #         name="Boundaries",
+        #         x=[1, 1, None, -0.2, 1.2, None, 0, 0, None, 0, 1],
+        #         y=[0, 1, None, 0, 0, None, -0.2, 1.2, None, 1, 1],
+        #         mode="lines",
+        #         line=go.scatter.Line(color="purple"),
+        #         showlegend=False)
+        #     )
 
-        fig.add_trace(
-            go.Scatter(
-                name="Threshold",
-                x=[threshold, threshold],
-                y=[-0.2, 1.2],
-                mode="lines",
-                line=go.scatter.Line(color="red"),
-                showlegend=False)
-            )
+        # fig.add_trace(
+        #     go.Scatter(
+        #         name="Threshold",
+        #         x=[threshold, threshold],
+        #         y=[-0.2, 1.2],
+        #         mode="lines",
+        #         line=go.scatter.Line(color="red"),
+        #         showlegend=False)
+        #     )
 
-        baseline = sum(self.y_ground_truth == "0")/len(self.y_ground_truth)
-        fig.add_trace(
-            go.Scatter(
-                name="Baseline",
-                x=[-0.2, 1.2],
-                y=[baseline, baseline],
-                mode="lines",
-                line={'dash': 'dot', 'color': 'green'},
-                showlegend=False)
-            )
+        # baseline = sum(self.y_ground_truth == "0")/len(self.y_ground_truth)
+        # fig.add_trace(
+        #     go.Scatter(
+        #         name="Baseline",
+        #         x=[-0.2, 1.2],
+        #         y=[baseline, baseline],
+        #         mode="lines",
+        #         line={'dash': 'dot', 'color': 'green'},
+        #         showlegend=False)
+        #     )
         
-        fig.add_trace(
-            go.Scatter(
-                name="octant boundaries",
-                x=[0, threshold, None, threshold, 1],
-                y=[self.class_0_cdf_from_bottom[cdf_cutoff], self.class_0_cdf_from_bottom[cdf_cutoff], None, self.class_0_cdf_from_top[cdf_cutoff], self.class_0_cdf_from_top[cdf_cutoff]],
-                mode="lines",
-                line={'dash': 'dash', 'color': 'orange'},
-                showlegend=False)
-            )
+        # fig.add_trace(
+        #     go.Scatter(
+        #         name="octant boundaries",
+        #         x=[0, threshold, None, threshold, 1],
+        #         y=[self.class_0_cdf_from_bottom[cdf_cutoff], self.class_0_cdf_from_bottom[cdf_cutoff], None, self.class_0_cdf_from_top[cdf_cutoff], self.class_0_cdf_from_top[cdf_cutoff]],
+        #         mode="lines",
+        #         line={'dash': 'dash', 'color': 'orange'},
+        #         showlegend=False)
+        #     )
 
         return fig
 
     def plot_ROC(self, threshold):
         fpr, tpr, _ = roc_curve(np.array(self.y_ground_truth == '1'), self.y_pred)
 
-        fig1 = px.line(y=tpr, x = fpr, width=600, height=600)
+        fig1 = px.line(y=tpr, x = fpr)
         fig1.add_trace(
             go.Scatter(
                 x=[0,1],
@@ -141,19 +156,27 @@ class binary_classifier_tool:
         fig2 = go.Figure(data=go.Scatter(
             x=[FPR],
             y=[recall_TPR], 
+            name="Cutoff",
+            mode = "markers",
             marker=dict(color=[2])
         ))
-        fig2.update_layout(
-                width=600,
-                height=600
-                )
         
         fig3 = go.Figure(data=fig1.data + fig2.data)
+
+        fig3.update_layout(
+                title={
+                        'text': "ROC Curve",
+                        'yanchor': 'top'},
+                width=400,
+                height=400
+                )
+        fig3.update_xaxes(title_text='False Positive Rate')
+        fig3.update_yaxes(title_text='True Positive Rate(Recall)')
         return fig3
 
     def plot_PR_Curve(self, threshold):
         precision, recall, _ = precision_recall_curve(np.array(self.y_ground_truth == '1'), self.y_pred)
-        fig1 = px.line(y=precision, x = recall, width=600, height=600)
+        fig1 = px.line(y=precision, x = recall, title="PR curve")
         baseline = sum(self.y_ground_truth == "1")/len(self.y_ground_truth)
         fig1.add_trace(
             go.Scatter(
@@ -169,14 +192,21 @@ class binary_classifier_tool:
         fig2 = go.Figure(data=go.Scatter(
             x=[recall_TPR],
             y=[Precision], 
-            marker=dict(color=[2])
+            name="Cutoff",
+            mode = "markers",
+            marker=dict(color=[2], size = 8)
         ))
-        fig2.update_layout(
-                width=600,
-                height=600
-                )
-        
+
         fig3 = go.Figure(data=fig1.data + fig2.data)
+        
+        fig3.update_layout(
+                title={
+                    'text': "PR Curve",
+                    'yanchor': 'top'},
+                width=400,
+                height=400)
+        fig3.update_xaxes(title_text='Recall')
+        fig3.update_yaxes(title_text='Precision')
         return fig3
 
 
