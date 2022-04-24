@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 import plotly.express as px
+import plotly.graph_objs as go
 
 from libraries.binary_classifier_tool import binary_classifier_tool
 
@@ -26,42 +27,64 @@ def main():
         # container = st.container()
         # configure_saved = container.button('Save Config?')
 
-        col1, col2, col3, col4 = st.columns(4)
-        class_A_X1_center = col1.number_input('Classs A, X_1 center', value = 1)
-        class_A_X2_center = col1.number_input('Classs A, X_2 center', value = 1)
-        class_A_X1_sd = col1.number_input('Classs A, X_1 SD', value = 0.5)
-        class_A_X2_sd = col1.number_input('Classs A, X_2 SD', value = 0.5)
+        col1, col2, col3, _ = st.columns(4)
+
+        ## Initialize or set Class 1 configurations
+        st.session_state.class_1_X1_center = col1.number_input(
+            'class 1, X_1 center', 
+            value = st.session_state.class_1_X1_center if 'class_1_X1_center' in st.session_state else 10)
+        st.session_state.class_1_X2_center = col1.number_input(
+            'class 1, X_2 center', 
+            value = st.session_state.class_1_X2_center if 'class_1_X2_center' in st.session_state else 10)
+        st.session_state.class_1_X1_sd = col1.number_input(
+            'class 1, X_1 SD', 
+            value = st.session_state.class_1_X1_sd if 'class_1_X1_sd' in st.session_state else 5)
+        st.session_state.class_1_X2_sd = col1.number_input(
+            'class 1, X_2 SD', 
+            value = st.session_state.class_1_X2_sd if 'class_1_X2_sd' in st.session_state else 5)
+        st.session_state.class_1_size = col1.number_input(
+            'Class 1 size', 
+            value = st.session_state.class_1_size if 'class_1_size' in st.session_state else 10000)
+
+        df1 = pd.DataFrame({"X_1": pd.Series(np.random.normal(st.session_state.class_1_X1_center, st.session_state.class_1_X1_sd, st.session_state.class_1_size) ),
+                            "X_2": pd.Series(np.random.normal(st.session_state.class_1_X2_center, st.session_state.class_1_X2_sd, st.session_state.class_1_size) ),
+                            "Class": pd.Series(["1" for _ in range(st.session_state.class_1_size)])} )
         
-        class_B_X1_center = col2.number_input('Classs B, X_1 center', value = 0)
-        class_B_X2_center = col2.number_input('Classs B, X_2 center', value = 0)
-        class_B_X1_sd = col2.number_input('Classs B, X_1 SD', value = 0.5)
-        class_B_X2_sd = col2.number_input('Classs B, X_2 SD', value = 0.5)
+        ## Initialize or set Class 0 configurations
+        st.session_state.class_0_X1_center = col2.number_input(
+            'Class 0, X_1 center', 
+            value = st.session_state.class_0_X1_center if 'class_0_X1_center' in st.session_state else 0)
+        st.session_state.class_0_X2_center = col2.number_input(
+            'Class 0, X_2 center', 
+            value = st.session_state.class_0_X2_center if 'class_0_X2_center' in st.session_state else 0)
+        st.session_state.class_0_X1_sd = col2.number_input(
+            'Class 0, X_1 SD', 
+            value = st.session_state.class_0_X2_sd if 'class_0_X2_sd' in st.session_state else 3)
+        st.session_state.class_0_X2_sd = col2.number_input(
+            'Class 0, X_2 SD', 
+            value = st.session_state.class_0_X2_sd if 'class_0_X2_sd' in st.session_state else 3)
+        st.session_state.class_0_size = col2.number_input(
+            'Classs B size', 
+            value = st.session_state.class_0_X2_sd if 'class_2_size' in st.session_state else 1000)
+        
+        df2 = pd.DataFrame({"X_1": pd.Series(np.random.normal(st.session_state.class_0_X1_center, st.session_state.class_0_X1_sd, st.session_state.class_0_size)),
+                            "X_2": pd.Series(np.random.normal(st.session_state.class_0_X2_center, st.session_state.class_0_X2_sd, st.session_state.class_0_size)),
+                            "Class": pd.Series(["0" for _ in range(st.session_state.class_0_size)])})
 
-        class_A_size = col1.number_input('Classs A size', value = 10000)
-        class_B_size = col2.number_input('Classs B size', value = 1000)
+        st.session_state.raw_data = pd.concat([df1, df2]) #df1.append(df2, ignore_index = True)
 
-        st.session_state.X1_class_A = np.random.normal(class_A_X1_center, class_A_X1_sd, class_A_size)
-        st.session_state.X2_class_A = np.random.normal(class_A_X2_center, class_A_X2_sd, class_A_size)
-        st.session_state.X1_class_B = np.random.normal(class_B_X1_center, class_B_X1_sd, class_B_size)
-        st.session_state.X2_class_B = np.random.normal(class_B_X2_center, class_B_X2_sd, class_B_size)
+        fig = px.scatter(st.session_state.raw_data, x="X_1", y="X_2", color="Class", width=600, height=600)
+        fig.add_trace(
+            go.Scatter(
+                name="axis",
+                x=[0, 0, None, min(st.session_state.raw_data["X_1"]) , max(st.session_state.raw_data["X_1"]) ],
+                y=[min(st.session_state.raw_data["X_2"]) , max(st.session_state.raw_data["X_2"]),  None, 0, 0],
+                mode="lines",
+                line=go.scatter.Line(color="purple"),
+                showlegend=False)
+            )
 
-
-        df1 = pd.DataFrame({"X_1": pd.Series(st.session_state.X1_class_A),
-                            "X_2": pd.Series(st.session_state.X2_class_A),
-                            "Class": pd.Series(["1" for _ in range(class_A_size)])})
-        df2 = pd.DataFrame({"X_1": pd.Series(st.session_state.X1_class_B),
-                            "X_2": pd.Series(st.session_state.X2_class_B),
-                            "Class": pd.Series(["0" for _ in range(class_B_size)])})
-
-        st.session_state.raw_data = df1.append(df2, ignore_index = True)
-
-        fig = px.scatter(st.session_state.raw_data, x="X_1", y="X_2", color="Class", symbol="Class", width=600, height=600)
         col3.plotly_chart(fig, use_container_width=False)
-
-        #configure_saved = st.button('Save Config?')
-
-        # if configure_saved:
-            # st.session_state.raw_data = data
 
 
     elif mode == "Classifier":
