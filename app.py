@@ -122,16 +122,18 @@ def main():
 
     elif mode == "Metrics":
         st.header("Metrics")
-        decision_threshold = st.slider("Threshold: ", 0.0, 1.0, 0.5)
+        
 
         
         obj = binary_classifier_tool(st.session_state.y_pred, st.session_state.y_test, step_size = 0.001)
         obj.metrics_precompute()
-        col1, col2, col3 = st.columns(3)
-        st.plotly_chart(obj.plot_all_in_one_graph(threshold = decision_threshold), use_container_width=False)
+        col1, col2 = st.columns(2)
+
+        decision_threshold = col1.slider("Threshold: ", 0.0, 1.0, 0.5)
+        col1.plotly_chart(obj.plot_all_in_one_graph(threshold = decision_threshold), use_container_width=True)
         
-        col2.plotly_chart(obj.plot_ROC(threshold = decision_threshold), use_container_width=False)
-        col3.plotly_chart(obj.plot_PR_Curve(threshold = decision_threshold), use_container_width=False)
+        col2.plotly_chart(obj.plot_ROC(threshold = decision_threshold), use_container_width=True)
+        col2.plotly_chart(obj.plot_PR_Curve(threshold = decision_threshold), use_container_width=True)
 
 
         TP_num, FP_num, TN_num, FN_num, precision, recall, FPR, ABC, w_l, w_r = obj.get_CM_metrics(threshold=decision_threshold)

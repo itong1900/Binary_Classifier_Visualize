@@ -4,6 +4,7 @@ import math
 
 import plotly.express as px
 import plotly.graph_objs as go
+from plotly.subplots import make_subplots
 
 from sklearn.metrics import roc_curve
 from sklearn.metrics import precision_recall_curve
@@ -50,91 +51,110 @@ class binary_classifier_tool:
 
 
     def plot_all_in_one_graph(self, threshold = 0.5):
-        fig = px.scatter(self.auxilary_df,
-                 width=600, height=800,
-                 x="y_pred",
-                 y="y_ground_truth",
-                 color="y_ground_truth",
-                 marginal_x="histogram",  # plot on x-axis margin
-                 title="Scatter plot with margin plots")
-        # cdf_cutoff = math.floor(threshold/self.step_size)
-        # fig.add_trace(
-        #     go.Scatter(
-        #         name="trend_from_lower",
-        #         x=np.arange(0, threshold, self.step_size),
-        #         y=self.class_0_cdf_from_bottom[:cdf_cutoff],
-        #         mode="lines",
-        #         line={'color': 'blue'},
-        #         showlegend=False)
-        #     )   #px.line(y=self.class_0_cdf_from_bottom[:cdf_cutoff], x = np.arange(0, threshold, self.step_size),  width=400, height=400)
-        # fig.add_trace(
-        #     go.Scatter(
-        #         name="trend_from_lower",
-        #         x=np.arange(threshold, 1.000001, self.step_size),
-        #         y=self.class_0_cdf_from_bottom[cdf_cutoff:],
-        #         mode="lines",
-        #         line={'color': 'grey'},
-        #         showlegend=False)
-        #     )
-        # fig.add_trace(
-        #     go.Scatter(
-        #         name="upper half",
-        #         x=np.arange(threshold, 1.00001, self.step_size),
-        #         y=self.class_0_cdf_from_top[cdf_cutoff: ],
-        #         mode="lines",
-        #         line={'color': 'blue'},
-        #         showlegend=False)
-        #     )
-        # fig.add_trace(
-        #     go.Scatter(
-        #         name="trend_from_upper",
-        #         x=np.arange(0, threshold, self.step_size),
-        #         y=self.class_0_cdf_from_top[:cdf_cutoff],
-        #         mode="lines",
-        #         line={'color': 'grey'},
-        #         showlegend=False)
-        #     )
-        
-        # fig.add_trace(
-        #     go.Scatter(
-        #         name="Boundaries",
-        #         x=[1, 1, None, -0.2, 1.2, None, 0, 0, None, 0, 1],
-        #         y=[0, 1, None, 0, 0, None, -0.2, 1.2, None, 1, 1],
-        #         mode="lines",
-        #         line=go.scatter.Line(color="purple"),
-        #         showlegend=False)
-        #     )
+        fig = make_subplots(rows=2, cols=1,
+                    row_heights=[0.1, 0.9],
+                    vertical_spacing = 0.02,
+                    shared_yaxes=False,
+                    shared_xaxes=True)
 
-        # fig.add_trace(
-        #     go.Scatter(
-        #         name="Threshold",
-        #         x=[threshold, threshold],
-        #         y=[-0.2, 1.2],
-        #         mode="lines",
-        #         line=go.scatter.Line(color="red"),
-        #         showlegend=False)
-        #     )
+        fig.add_trace(go.Histogram(x=self.auxilary_df[self.auxilary_df["y_ground_truth"] == "1"]['y_pred'], xbins=dict(size=0.02), name="class1"), row = 1, col = 1)
+        fig.add_trace(go.Histogram(x=self.auxilary_df[self.auxilary_df["y_ground_truth"] == "0"]['y_pred'], xbins=dict(size=0.02), name="class0"), row = 1, col = 1)
+        fig.add_trace(go.Scatter(name="Threshold", x=[threshold, threshold], y=[-10, 2000], mode="lines", line=go.scatter.Line(color="red"), showlegend=False), row = 1, col = 1)
 
-        # baseline = sum(self.y_ground_truth == "0")/len(self.y_ground_truth)
-        # fig.add_trace(
-        #     go.Scatter(
-        #         name="Baseline",
-        #         x=[-0.2, 1.2],
-        #         y=[baseline, baseline],
-        #         mode="lines",
-        #         line={'dash': 'dot', 'color': 'green'},
-        #         showlegend=False)
-        #     )
+        cdf_cutoff = math.floor(threshold/self.step_size)
+        fig.add_trace(
+            go.Scatter(
+                name="trend_from_lower",
+                x=np.arange(0, threshold, self.step_size),
+                y=self.class_0_cdf_from_bottom[:cdf_cutoff],
+                mode="lines",
+                line={'color': 'blue'},
+                showlegend=False),
+                row = 2, col = 1
+            )   
+        #fig = px.line(y=self.class_0_cdf_from_bottom[:cdf_cutoff], x = np.arange(0, threshold, self.step_size),  width=400, height=400)
+        fig.add_trace(
+            go.Scatter(
+                name="trend_from_lower",
+                x=np.arange(threshold, 1.000001, self.step_size),
+                y=self.class_0_cdf_from_bottom[cdf_cutoff:],
+                mode="lines",
+                line={'color': 'grey'},
+                showlegend=False),
+                row = 2, col = 1
+            )
+        fig.add_trace(
+            go.Scatter(
+                name="upper half",
+                x=np.arange(threshold, 1.00001, self.step_size),
+                y=self.class_0_cdf_from_top[cdf_cutoff: ],
+                mode="lines",
+                line={'color': 'blue'},
+                showlegend=False),
+                row = 2, col = 1
+            )
+        fig.add_trace(
+            go.Scatter(
+                name="trend_from_upper",
+                x=np.arange(0, threshold, self.step_size),
+                y=self.class_0_cdf_from_top[:cdf_cutoff],
+                mode="lines",
+                line={'color': 'grey'},
+                showlegend=False),
+                row = 2, col = 1
+            )
         
-        # fig.add_trace(
-        #     go.Scatter(
-        #         name="octant boundaries",
-        #         x=[0, threshold, None, threshold, 1],
-        #         y=[self.class_0_cdf_from_bottom[cdf_cutoff], self.class_0_cdf_from_bottom[cdf_cutoff], None, self.class_0_cdf_from_top[cdf_cutoff], self.class_0_cdf_from_top[cdf_cutoff]],
-        #         mode="lines",
-        #         line={'dash': 'dash', 'color': 'orange'},
-        #         showlegend=False)
-        #     )
+        fig.add_trace(
+            go.Scatter(
+                name="Boundaries",
+                x=[1, 1, None, -0.1, 1.1, None, 0, 0, None, 0, 1],
+                y=[0, 1, None, 0, 0, None, -0.15, 1.15, None, 1, 1],
+                mode="lines",
+                line=go.scatter.Line(color="purple"),
+                showlegend=False),
+                row = 2, col = 1
+            )
+
+        fig.add_trace(
+            go.Scatter(
+                name="Threshold",
+                x=[threshold, threshold],
+                y=[-0.1, 1.1],
+                mode="lines",
+                line=go.scatter.Line(color="red"),
+                showlegend=False),
+                row = 2, col = 1
+            )
+
+        baseline = sum(self.y_ground_truth == "0")/len(self.y_ground_truth)
+        fig.add_trace(
+            go.Scatter(
+                name="Baseline",
+                x=[-0.05, 1.05],
+                y=[baseline, baseline],
+                mode="lines",
+                line={'dash': 'dot', 'color': 'green'},
+                showlegend=False),
+                row = 2, col = 1
+            )
+        
+        fig.add_trace(
+            go.Scatter(
+                name="octant boundaries",
+                x=[0, threshold, None, threshold, 1],
+                y=[self.class_0_cdf_from_bottom[cdf_cutoff], self.class_0_cdf_from_bottom[cdf_cutoff], None, self.class_0_cdf_from_top[cdf_cutoff], self.class_0_cdf_from_top[cdf_cutoff]],
+                mode="lines",
+                line={'dash': 'dash', 'color': 'orange'},
+                showlegend=False),
+                row = 2, col = 1
+            )
+        fig.update_layout(
+                bargap=0,
+                bargroupgap = 0,
+                width=600,
+                height=650,
+                legend=dict(orientation="v", yanchor="top", y = 0.98, xanchor="left", x= 0.99, font=dict(family="Courier",size=8,color="black"))
+            )
 
         return fig
 
