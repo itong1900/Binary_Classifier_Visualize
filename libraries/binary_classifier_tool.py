@@ -52,14 +52,14 @@ class binary_classifier_tool:
 
     def plot_all_in_one_graph(self, threshold = 0.5):
         fig = make_subplots(rows=2, cols=1,
-                    row_heights=[0.1, 0.9],
+                    row_heights=[0.2, 0.8],
                     vertical_spacing = 0.02,
                     shared_yaxes=False,
                     shared_xaxes=True)
 
         fig.add_trace(go.Histogram(x=self.auxilary_df[self.auxilary_df["y_ground_truth"] == "1"]['y_pred'], xbins=dict(size=0.02), name="class1"), row = 1, col = 1)
         fig.add_trace(go.Histogram(x=self.auxilary_df[self.auxilary_df["y_ground_truth"] == "0"]['y_pred'], xbins=dict(size=0.02), name="class0"), row = 1, col = 1)
-        fig.add_trace(go.Scatter(name="Threshold", x=[threshold, threshold], y=[-10, 2000], mode="lines", line=go.scatter.Line(color="red"), showlegend=False), row = 1, col = 1)
+        fig.add_trace(go.Scatter(name="Threshold", x=[threshold, threshold], y=[-20, 0], mode="lines", line=go.scatter.Line(color="red"), showlegend=False), row = 1, col = 1)
 
         cdf_cutoff = math.floor(threshold/self.step_size)
         fig.add_trace(
@@ -156,6 +156,8 @@ class binary_classifier_tool:
                 legend=dict(orientation="v", yanchor="top", y = 0.98, xanchor="left", x= 0.99, font=dict(family="Courier",size=8,color="black"))
             )
 
+        fig.update_xaxes(title_text='y_pred', row = 2, col = 1)
+        fig.update_yaxes(title_text='Proportion of negative class (labeled as 0)', row = 2, col = 1)
         return fig
 
     def plot_ROC(self, threshold):

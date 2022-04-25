@@ -132,24 +132,19 @@ def main():
         decision_threshold = col1.slider("Threshold: ", 0.0, 1.0, 0.5)
         col1.plotly_chart(obj.plot_all_in_one_graph(threshold = decision_threshold), use_container_width=True)
         
-        col2.plotly_chart(obj.plot_ROC(threshold = decision_threshold), use_container_width=True)
-        col2.plotly_chart(obj.plot_PR_Curve(threshold = decision_threshold), use_container_width=True)
+        col2.plotly_chart(obj.plot_ROC(threshold = decision_threshold), use_container_width=False)
+        col2.plotly_chart(obj.plot_PR_Curve(threshold = decision_threshold), use_container_width=False)
 
 
+        col3, col4 = st.columns(2)
         TP_num, FP_num, TN_num, FN_num, precision, recall, FPR, ABC, w_l, w_r = obj.get_CM_metrics(threshold=decision_threshold)
-        st.write("#TP = ", TP_num)
-        st.write("#FP = ", FP_num)
-        st.write("#TN = ", TN_num)
-        st.write("#FN = ", FN_num)
-        
-        st.write("weight from left = ", w_l)
-        st.write("weight from right = ", w_r)
-        st.write("precision = ", precision)
-        st.write("recall = ", recall)
-        st.write("FPR = ", FPR)
-        st.write("Area Between Curves = ", ABC)
 
-        st.plotly_chart(obj.plot_histogram())
+        metrics_df = pd.DataFrame({'Metrics':['Precision', 'Recall', 'FPR', 'Area Between Curves', "#TP", "#FP", "#TN", "#FN"],
+                                   'Value':[precision, recall, FPR, ABC, int(TP_num), int(FP_num), int(TN_num), int(FN_num)]}) 
+
+        col1.dataframe(metrics_df)
+
+        #st.plotly_chart(obj.plot_histogram())
 
 
 ## Dumb Classifier
