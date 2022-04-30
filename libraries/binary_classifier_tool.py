@@ -10,7 +10,7 @@ from sklearn.metrics import roc_curve
 from sklearn.metrics import precision_recall_curve
 
 class binary_classifier_tool:
-    def __init__(self, y_pred, y_ground_truth, step_size = 0.01):
+    def __init__(self, y_pred, y_ground_truth, step_size = 0.0001):
         self.y_pred = y_pred
         self.y_ground_truth = y_ground_truth
         self.step_size = step_size
@@ -28,8 +28,8 @@ class binary_classifier_tool:
         ## Get the class_0_ratio cdf from bottom
         for upper_bound in bin_bounds:
 
-            num_class_0_bin = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == "0") & (self.auxilary_df["y_pred"] < upper_bound)].shape[0]
-            total_num_bin = self.auxilary_df[(self.auxilary_df["y_pred"] < upper_bound)].shape[0]
+            num_class_0_bin = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == "0") & (self.auxilary_df["y_pred"] <= upper_bound)].shape[0]
+            total_num_bin = self.auxilary_df[(self.auxilary_df["y_pred"] <= upper_bound)].shape[0]
 
             if total_num_bin == 0:
                 ratio_class_0_bin = 1
@@ -40,14 +40,24 @@ class binary_classifier_tool:
         ## Get the class_0_ratio cdf greater than threshold value
         for lower_bound in bin_bounds:
 
-            num_class_0_bin = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == "0") & (self.auxilary_df["y_pred"] > lower_bound)].shape[0]
-            total_num_bin = self.auxilary_df[(self.auxilary_df["y_pred"] > lower_bound)].shape[0]
+            num_class_0_bin = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == "0") & (self.auxilary_df["y_pred"] >= lower_bound)].shape[0]
+            total_num_bin = self.auxilary_df[(self.auxilary_df["y_pred"] >= lower_bound)].shape[0]
 
             if total_num_bin == 0:
                 ratio_class_0_bin = 0
             else:
                 ratio_class_0_bin = num_class_0_bin / total_num_bin 
             self.class_0_cdf_from_top.append(ratio_class_0_bin)
+
+        ## get how many counts in each bin
+        each_bin_count = []
+        lower = 0
+        for _ in range(50):
+            upper = lower + 0.02
+            coun = len(self.y_pred[(self.y_pred >= lower) & (self.y_pred <= upper)])
+            each_bin_count.append(coun)
+            lower += 0.02
+        self.hist_threshold_ceiling = max(each_bin_count)
 
 
     def plot_all_in_one_graph(self, threshold = 0.5):
@@ -57,11 +67,24 @@ class binary_classifier_tool:
                     shared_yaxes=False,
                     shared_xaxes=True)
 
+        cdf_cutoff = math.floor(threshold/self.step_size)
+        
+        ## add shaded shape
+        fig.add_shape(type="rect", x0=threshold, y0=self.class_0_cdf_from_top[cdf_cutoff], x1=1, y1=1, line=dict(color="RoyalBlue", width=2,), fillcolor="#94D9FF", layer="below", row = 2, col = 1)
+        fig.add_shape(type="rect", x0=0, y0=0, x1=threshold, y1=self.class_0_cdf_from_bottom[cdf_cutoff], line=dict(color="RoyalBlue", width=2,), fillcolor="#F77559", layer="below", row = 2, col = 1)
+        
+        ## add label annotations
+        fig.add_annotation(x=(1 + threshold)/2, y=(1+self.class_0_cdf_from_top[cdf_cutoff])/2, text="TP", showarrow=False, arrowhead=2, row = 2, col = 1)
+        fig.add_annotation(x=threshold/2, y=self.class_0_cdf_from_bottom[cdf_cutoff]/2, text="TN", showarrow=False, arrowhead=2, row = 2, col = 1)
+        fig.add_annotation(x=threshold/2, y=(1+self.class_0_cdf_from_bottom[cdf_cutoff])/2, text="FN", showarrow=False, arrowhead=2, row = 2, col = 1)
+        fig.add_annotation(x=(1 + threshold)/2, y=self.class_0_cdf_from_top[cdf_cutoff]/2,text="FP", showarrow=False, arrowhead=2, row = 2, col = 1)
+
+
         fig.add_trace(go.Histogram(x=self.auxilary_df[self.auxilary_df["y_ground_truth"] == "1"]['y_pred'], xbins=dict(size=0.02), name="class1"), row = 1, col = 1)
         fig.add_trace(go.Histogram(x=self.auxilary_df[self.auxilary_df["y_ground_truth"] == "0"]['y_pred'], xbins=dict(size=0.02), name="class0"), row = 1, col = 1)
-        fig.add_trace(go.Scatter(name="Threshold", x=[threshold, threshold], y=[-20, 0], mode="lines", line=go.scatter.Line(color="red"), showlegend=False), row = 1, col = 1)
+        fig.add_trace(go.Scatter(name="Threshold", x=[threshold, threshold], y=[-20, self.hist_threshold_ceiling], mode="lines", line=go.scatter.Line(color="red"), showlegend=False), row = 1, col = 1)
 
-        cdf_cutoff = math.floor(threshold/self.step_size)
+
         fig.add_trace(
             go.Scatter(
                 name="trend_from_lower",
@@ -148,6 +171,8 @@ class binary_classifier_tool:
                 showlegend=False),
                 row = 2, col = 1
             )
+
+        
         fig.update_layout(
                 bargap=0,
                 bargroupgap = 0,
@@ -157,7 +182,7 @@ class binary_classifier_tool:
             )
 
         fig.update_xaxes(title_text='y_pred', row = 2, col = 1)
-        fig.update_yaxes(title_text='Proportion of negative class (labeled as 0)', row = 2, col = 1)
+        fig.update_yaxes(title_text='Class 0 Proportion', row = 2, col = 1)
         return fig
 
     def plot_ROC(self, threshold):
@@ -242,9 +267,9 @@ class binary_classifier_tool:
         TN_num = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == "0") & (self.auxilary_df["y_pred"] <= threshold)].shape[0]
         FN_num = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == "1") & (self.auxilary_df["y_pred"] <= threshold)].shape[0]
 
-        precision = TP_num/(TP_num + FP_num)
-        recall_TPR = TP_num/(TP_num + FN_num)
-        FPR = FP_num/(FP_num + TN_num)
+        precision = TP_num/(TP_num + FP_num) if (TP_num + FP_num) > 0  else 1
+        recall_TPR = TP_num/(TP_num + FN_num) if (TP_num + FN_num) > 0 else 1
+        FPR = FP_num/(FP_num + TN_num) if (FP_num + TN_num) > 0 else 0
 
         Area_between_curve = np.sum(np.subtract(self.class_0_cdf_from_bottom, self.class_0_cdf_from_top) * self.step_size )
 
@@ -252,5 +277,3 @@ class binary_classifier_tool:
         weight_from_right = 1 - weight_from_left
 
         return TP_num, FP_num, TN_num, FN_num, precision, recall_TPR, FPR, Area_between_curve, weight_from_left, weight_from_right
-
-

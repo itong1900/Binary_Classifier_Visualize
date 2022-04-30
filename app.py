@@ -11,6 +11,7 @@ from libraries.binary_classifier_tool import binary_classifier_tool
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.utils import class_weight
 
 
@@ -30,6 +31,7 @@ def main():
         col1, col2, col3, _ = st.columns(4)
 
         ## Initialize or set Class 1 configurations
+        col1.write("Class 1 Configurations")
         st.session_state.class_1_X1_center = col1.number_input(
             'class 1, X_1 center', 
             value = st.session_state.class_1_X1_center if 'class_1_X1_center' in st.session_state else 10)
@@ -51,6 +53,7 @@ def main():
                             "Class": pd.Series(["1" for _ in range(st.session_state.class_1_size)])} )
         
         ## Initialize or set Class 0 configurations
+        col2.write("Class 0 Configurations")
         st.session_state.class_0_X1_center = col2.number_input(
             'Class 0, X_1 center', 
             value = st.session_state.class_0_X1_center if 'class_0_X1_center' in st.session_state else 0)
@@ -64,8 +67,8 @@ def main():
             'Class 0, X_2 SD', 
             value = st.session_state.class_0_X2_sd if 'class_0_X2_sd' in st.session_state else 3)
         st.session_state.class_0_size = col2.number_input(
-            'Classs B size', 
-            value = st.session_state.class_0_X2_sd if 'class_2_size' in st.session_state else 1000)
+            'Classs 0 size', 
+            value = st.session_state.class_0_size if 'class_0_size' in st.session_state else 1000)
         
         df2 = pd.DataFrame({"X_1": pd.Series(np.random.normal(st.session_state.class_0_X1_center, st.session_state.class_0_X1_sd, st.session_state.class_0_size)),
                             "X_2": pd.Series(np.random.normal(st.session_state.class_0_X2_center, st.session_state.class_0_X2_sd, st.session_state.class_0_size)),
@@ -97,21 +100,18 @@ def main():
         
         X_train, X_test, y_train, y_test = train_test_split(permuted_data.drop('Class',axis=1), permuted_data["Class"], test_size = 1-train_size, random_state = 100) 
 
-        classifier_name = st.selectbox("Choose Type of Classifier", ["Dumb Classifier", "Logistic Regression", "SVM", "Neural Network"])
+        classifier_name = st.selectbox("Choose Type of Classifier", ["Dumb Classifier", "Logistic Regression", "KNN Classifier", "SVM", "Neural Network"])
         
         if classifier_name == "Dumb Classifier":
             y_pred = dumbClassifer(X_test)
         elif classifier_name == "Logistic Regression":
-            # recommended_weights = class_weight.compute_class_weight(class_weights = 'balanced',
-            #                                                         classes = np.unique(y_train),
-            #                                                         y = y_train)
-            # class_0_weight = st.slider("class weight on fit class 0", min_value=0.0, max_value=1.0, value=recommended_weights['0'])
-
-            # class_weight_lgr = {"0": class_0_weight,
-            #                     "1": class_0_weight * }
-
             logmodel = LogisticRegression(random_state=100).fit(X_train, y_train)
             y_pred = logmodel.predict_proba(X_test)[:,1]
+        elif classifier_name == "KNN Classifier":
+            neigh = KNeighborsClassifier(n_neighbors=6)
+            neigh.fit(X_train, y_train)
+            y_pred = neigh.predict_proba(X_test)[:,1]
+            
 
         model_saved = st.button('Save Model?')
 
@@ -122,8 +122,6 @@ def main():
 
     elif mode == "Metrics":
         st.header("Metrics")
-        
-
         
         obj = binary_classifier_tool(st.session_state.y_pred, st.session_state.y_test, step_size = 0.001)
         obj.metrics_precompute()
@@ -143,6 +141,7 @@ def main():
                                    'Value':[precision, recall, FPR, ABC, int(TP_num), int(FP_num), int(TN_num), int(FN_num)]}) 
 
         col1.dataframe(metrics_df)
+
 
         #st.plotly_chart(obj.plot_histogram())
 
