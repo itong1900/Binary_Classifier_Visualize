@@ -36,58 +36,66 @@ def main():
 
             col1, col2, col3, _ = st.columns(4)
 
-            ## Initialize or set Class 1 configurations
-            col1.write("Class 1 Configurations")
-            st.session_state.class_1_X1_center = col1.number_input(
-                'class 1, X_1 center', 
-                value = st.session_state.class_1_X1_center if 'class_1_X1_center' in st.session_state else 10)
-            st.session_state.class_1_X2_center = col1.number_input(
-                'class 1, X_2 center', 
-                value = st.session_state.class_1_X2_center if 'class_1_X2_center' in st.session_state else 10)
-            st.session_state.class_1_X1_sd = col1.number_input(
-                'class 1, X_1 SD', 
-                value = st.session_state.class_1_X1_sd if 'class_1_X1_sd' in st.session_state else 5)
-            st.session_state.class_1_X2_sd = col1.number_input(
-                'class 1, X_2 SD', 
-                value = st.session_state.class_1_X2_sd if 'class_1_X2_sd' in st.session_state else 5)
-            st.session_state.class_1_size = col1.number_input(
-                'Class 1 size', 
-                value = st.session_state.class_1_size if 'class_1_size' in st.session_state else 10000)
-
-            df1 = pd.DataFrame({"X_1": pd.Series(np.random.normal(st.session_state.class_1_X1_center, st.session_state.class_1_X1_sd, st.session_state.class_1_size) ),
-                                "X_2": pd.Series(np.random.normal(st.session_state.class_1_X2_center, st.session_state.class_1_X2_sd, st.session_state.class_1_size) ),
-                                "Class": pd.Series(["1" for _ in range(st.session_state.class_1_size)])} )
-        
-            ## Initialize or set Class 0 configurations
-            col2.write("Class 0 Configurations")
-            st.session_state.class_0_X1_center = col2.number_input(
-                'Class 0, X_1 center', 
-                value = st.session_state.class_0_X1_center if 'class_0_X1_center' in st.session_state else 0)
-            st.session_state.class_0_X2_center = col2.number_input(
-                'Class 0, X_2 center', 
-                value = st.session_state.class_0_X2_center if 'class_0_X2_center' in st.session_state else 0)
-            st.session_state.class_0_X1_sd = col2.number_input(
-                'Class 0, X_1 SD', 
-                value = st.session_state.class_0_X2_sd if 'class_0_X2_sd' in st.session_state else 3)
-            st.session_state.class_0_X2_sd = col2.number_input(
-                'Class 0, X_2 SD', 
-                value = st.session_state.class_0_X2_sd if 'class_0_X2_sd' in st.session_state else 3)
-            st.session_state.class_0_size = col2.number_input(
-                'Classs 0 size', 
-                value = st.session_state.class_0_size if 'class_0_size' in st.session_state else 1000)
+            ## Initialize or set Class A configurations
+            col1.write("Class A Configurations")
+            st.session_state.class_A_X1_center = col1.number_input(
+                'Class A, X_1 center', 
+                value = st.session_state.class_A_X1_center if 'class_A_X1_center' in st.session_state else 10)
+            st.session_state.class_A_X2_center = col1.number_input(
+                'Class A, X_2 center', 
+                value = st.session_state.class_A_X2_center if 'class_A_X2_center' in st.session_state else 10)
+            st.session_state.class_A_X1_sd = col1.number_input(
+                'Class A, X_1 SD', 
+                value = st.session_state.class_A_X1_sd if 'class_A_X1_sd' in st.session_state else 5)
+            st.session_state.class_A_X2_sd = col1.number_input(
+                'Class A, X_2 SD', 
+                value = st.session_state.class_A_X2_sd if 'class_A_X2_sd' in st.session_state else 5)
+            st.session_state.class_A_size = col1.number_input(
+                'Class A size', 
+                value = st.session_state.class_A_size if 'class_A_size' in st.session_state else 5000)
             
-            df2 = pd.DataFrame({"X_1": pd.Series(np.random.normal(st.session_state.class_0_X1_center, st.session_state.class_0_X1_sd, st.session_state.class_0_size)),
-                                "X_2": pd.Series(np.random.normal(st.session_state.class_0_X2_center, st.session_state.class_0_X2_sd, st.session_state.class_0_size)),
-                                "Class": pd.Series(["0" for _ in range(st.session_state.class_0_size)])})
+            ## Class A np matrix
+            class_A_matrix = np.concatenate( (np.random.normal(st.session_state.class_A_X1_center, st.session_state.class_A_X1_sd, st.session_state.class_A_size).reshape(-1, 1), 
+                                              np.random.normal(st.session_state.class_A_X2_center, st.session_state.class_A_X2_sd, st.session_state.class_A_size).reshape(-1, 1),
+                                              np.ones((st.session_state.class_A_size, 1))),
+                                              axis = 1)
+        
+            ## Initialize or set Class B configurations
+            col2.write("Class B Configurations")
+            st.session_state.class_B_X1_center = col2.number_input(
+                'Class B, X_1 center', 
+                value = st.session_state.class_B_X1_center if 'class_B_X1_center' in st.session_state else 0)
+            st.session_state.class_B_X2_center = col2.number_input(
+                'Class B, X_2 center', 
+                value = st.session_state.class_B_X2_center if 'class_B_X2_center' in st.session_state else 0)
+            st.session_state.class_B_X1_sd = col2.number_input(
+                'Class B, X_1 SD', 
+                value = st.session_state.class_B_X2_sd if 'class_B_X2_sd' in st.session_state else 3)
+            st.session_state.class_B_X2_sd = col2.number_input(
+                'Class B, X_2 SD', 
+                value = st.session_state.class_B_X2_sd if 'class_B_X2_sd' in st.session_state else 3)
+            st.session_state.class_B_size = col2.number_input(
+                'Class B size', 
+                value = st.session_state.class_B_size if 'class_B_size' in st.session_state else 1000)
 
-            st.session_state.raw_data = pd.concat([df1, df2]) #df1.append(df2, ignore_index = True)
+            ## Class B np matrix
+            class_B_matrix = np.concatenate( (np.random.normal(st.session_state.class_B_X1_center, st.session_state.class_B_X1_sd, st.session_state.class_B_size).reshape(-1, 1), 
+                                              np.random.normal(st.session_state.class_B_X2_center, st.session_state.class_B_X2_sd, st.session_state.class_B_size).reshape(-1, 1),
+                                              np.zeros((st.session_state.class_B_size, 1))),
+                                              axis = 1)
 
-            fig = px.scatter(st.session_state.raw_data, x="X_1", y="X_2", color="Class", width=600, height=600)
+            st.session_state.raw_data = np.append(class_A_matrix, class_B_matrix, axis=0)
+            np.random.shuffle(st.session_state.raw_data)
+
+            df = pd.DataFrame(data=st.session_state.raw_data, columns=["X_1", "X_2", "Class"])
+            df["Class"] = df["Class"].astype("category")
+    
+            fig = px.scatter(df, x="X_1", y="X_2", color="Class", width=600, height=600)
             fig.add_trace(
                 go.Scatter(
                     name="axis",
-                    x=[0, 0, None, min(st.session_state.raw_data["X_1"]) , max(st.session_state.raw_data["X_1"]) ],
-                    y=[min(st.session_state.raw_data["X_2"]) , max(st.session_state.raw_data["X_2"]),  None, 0, 0],
+                    x=[0, 0, None, min(df["X_1"]) , max(df["X_1"]) ],
+                    y=[min(df["X_2"]) , max(df["X_2"]),  None, 0, 0],
                     mode="lines",
                     line=go.scatter.Line(color="purple"),
                     showlegend=False)
@@ -114,16 +122,19 @@ def main():
 
             r_a = 2*theta_1 + pi
             data_a = np.array([np.cos(theta_1)*r_a, np.sin(theta_1)*r_a]).T
-            x_a = data_a + st.session_state.class_A_noise *np.random.randn(st.session_state.class_A_size, 2)
+            x_a = data_a + st.session_state.class_A_noise * np.random.randn(st.session_state.class_A_size, 2)
 
-            df1 = pd.DataFrame({"X_1": pd.Series(x_a[:, 0]),
-                                "X_2": pd.Series(x_a[:, 1]),
-                                "Class": pd.Series(["1" for _ in range(st.session_state.class_A_size)])} )
+
+            ## Class A np matrix
+            class_A_matrix = np.concatenate( (x_a[:, 0].reshape(-1, 1), 
+                                              x_a[:, 1].reshape(-1, 1),
+                                              np.ones((st.session_state.class_A_size, 1))),
+                                              axis = 1)
 
             ## Initialize or set Class B configurations
             col2.write("Class B Configurations")
             st.session_state.class_B_size = col2.number_input(
-                'Classs B size', 
+                'Class B size', 
                 value = st.session_state.class_B_size if 'class_B_size' in st.session_state else 1000)
             st.session_state.class_B_theta_size = col2.number_input(
                 'Class B Spiral Half Cycle', 
@@ -138,18 +149,23 @@ def main():
             data_b = np.array([np.cos(theta_2)*r_b, np.sin(theta_2)*r_b]).T
             x_b = data_b + st.session_state.class_B_noise * np.random.randn(st.session_state.class_B_size,2)
 
-            df2 = pd.DataFrame({"X_1": pd.Series(x_b[:, 0]),
-                                "X_2": pd.Series(x_b[:, 1]),
-                                "Class": pd.Series(["0" for _ in range(st.session_state.class_B_size)])} )
+            ## Class B np matrix
+            class_B_matrix = np.concatenate( (x_b[:, 0].reshape(-1, 1), 
+                                              x_b[:, 1].reshape(-1, 1),
+                                              np.zeros((st.session_state.class_B_size, 1))),
+                                              axis = 1)
 
-            st.session_state.raw_data = pd.concat([df1, df2]) #df1.append(df2, ignore_index = True)
+            st.session_state.raw_data = np.append(class_A_matrix, class_B_matrix, axis=0)
+            np.random.shuffle(st.session_state.raw_data)
+            df = pd.DataFrame(data=st.session_state.raw_data, columns=["X_1", "X_2", "Class"])
+            df["Class"] = df["Class"].astype("category")
 
-            fig = px.scatter(st.session_state.raw_data, x="X_1", y="X_2", color="Class", width=600, height=600)
+            fig = px.scatter(df, x="X_1", y="X_2", color="Class", width=600, height=600)
             fig.add_trace(
                 go.Scatter(
                     name="axis",
-                    x=[0, 0, None, min(st.session_state.raw_data["X_1"]) , max(st.session_state.raw_data["X_1"]) ],
-                    y=[min(st.session_state.raw_data["X_2"]) , max(st.session_state.raw_data["X_2"]),  None, 0, 0],
+                    x=[0, 0, None, min(df["X_1"]) , max(df["X_1"]) ],
+                    y=[min(df["X_2"]) , max(df["X_2"]),  None, 0, 0],
                     mode="lines",
                     line=go.scatter.Line(color="purple"),
                     showlegend=False)
@@ -164,9 +180,11 @@ def main():
         train_size = st.slider("Pick Training Size", min_value=0.0, max_value=1.0, value=st.session_state.train_size if 'train_size' in st.session_state else 0.7)
 
         ## preprocess data
-        permuted_data = st.session_state.raw_data.sample(frac = 1, random_state = 100).reset_index(drop = True)
+        #permuted_data = st.session_state.raw_data.sample(frac = 1, random_state = 100).reset_index(drop = True)
+        X = st.session_state.raw_data[:, 0:2]
+        y = st.session_state.raw_data[:, 2]
         
-        X_train, X_test, y_train, y_test = train_test_split(permuted_data.drop('Class',axis=1), permuted_data["Class"], test_size = 1-train_size, random_state = 100) 
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 1 - train_size, random_state = 100) 
 
         classifier_name = st.selectbox("Choose Type of Classifier", ["Dumb Classifier", "Logistic Regression", "KNN Classifier", "SVM", "Neural Network", "KNN Handcraft"])
         
@@ -183,8 +201,7 @@ def main():
             knn_classifier = knn.KNearestNeighbor()
             knn_classifier.train(X_train.to_numpy(), y_train.to_numpy())
             dists = knn_classifier.compute_distances_no_loops(X_test.to_numpy())
-            y_pred = knn_classifier.predict_labels(dists, k=8)
-            
+            y_pred = knn_classifier.predict_labels(dists, k=8)  
 
         model_saved = st.button('Save Model?')
 
