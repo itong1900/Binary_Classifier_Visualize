@@ -28,7 +28,7 @@ class binary_classifier_tool:
         ## Get the class_0_ratio cdf from bottom
         for upper_bound in bin_bounds:
 
-            num_class_0_bin = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == "0") & (self.auxilary_df["y_pred"] <= upper_bound)].shape[0]
+            num_class_0_bin = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == 0) & (self.auxilary_df["y_pred"] <= upper_bound)].shape[0]
             total_num_bin = self.auxilary_df[(self.auxilary_df["y_pred"] <= upper_bound)].shape[0]
 
             if total_num_bin == 0:
@@ -40,7 +40,7 @@ class binary_classifier_tool:
         ## Get the class_0_ratio cdf greater than threshold value
         for lower_bound in bin_bounds:
 
-            num_class_0_bin = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == "0") & (self.auxilary_df["y_pred"] >= lower_bound)].shape[0]
+            num_class_0_bin = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == 0) & (self.auxilary_df["y_pred"] >= lower_bound)].shape[0]
             total_num_bin = self.auxilary_df[(self.auxilary_df["y_pred"] >= lower_bound)].shape[0]
 
             if total_num_bin == 0:
@@ -80,8 +80,8 @@ class binary_classifier_tool:
         fig.add_annotation(x=(1 + threshold)/2, y=self.class_0_cdf_from_top[cdf_cutoff]/2,text="FP", showarrow=False, arrowhead=2, row = 2, col = 1)
 
 
-        fig.add_trace(go.Histogram(x=self.auxilary_df[self.auxilary_df["y_ground_truth"] == "1"]['y_pred'], xbins=dict(size=0.02), name="class1"), row = 1, col = 1)
-        fig.add_trace(go.Histogram(x=self.auxilary_df[self.auxilary_df["y_ground_truth"] == "0"]['y_pred'], xbins=dict(size=0.02), name="class0"), row = 1, col = 1)
+        fig.add_trace(go.Histogram(x=self.auxilary_df[self.auxilary_df["y_ground_truth"] == 1]['y_pred'], xbins=dict(size=0.02), name="class1"), row = 1, col = 1)
+        fig.add_trace(go.Histogram(x=self.auxilary_df[self.auxilary_df["y_ground_truth"] == 0]['y_pred'], xbins=dict(size=0.02), name="class0"), row = 1, col = 1)
         fig.add_trace(go.Scatter(name="Threshold", x=[threshold, threshold], y=[-20, self.hist_threshold_ceiling], mode="lines", line=go.scatter.Line(color="red"), showlegend=False), row = 1, col = 1)
 
 
@@ -149,7 +149,7 @@ class binary_classifier_tool:
                 row = 2, col = 1
             )
 
-        baseline = sum(self.y_ground_truth == "0")/len(self.y_ground_truth)
+        baseline = sum(self.y_ground_truth == 0)/len(self.y_ground_truth)
         fig.add_trace(
             go.Scatter(
                 name="Baseline",
@@ -186,7 +186,7 @@ class binary_classifier_tool:
         return fig
 
     def plot_ROC(self, threshold):
-        fpr, tpr, _ = roc_curve(np.array(self.y_ground_truth == '1'), self.y_pred)
+        fpr, tpr, _ = roc_curve(np.array(self.y_ground_truth == 1), self.y_pred)
 
         fig1 = px.line(y=tpr, x = fpr)
         fig1.add_trace(
@@ -222,9 +222,9 @@ class binary_classifier_tool:
         return fig3
 
     def plot_PR_Curve(self, threshold):
-        precision, recall, _ = precision_recall_curve(np.array(self.y_ground_truth == '1'), self.y_pred)
+        precision, recall, _ = precision_recall_curve(np.array(self.y_ground_truth == 1), self.y_pred)
         fig1 = px.line(y=precision, x = recall, title="PR curve")
-        baseline = sum(self.y_ground_truth == "1")/len(self.y_ground_truth)
+        baseline = sum(self.y_ground_truth == 1)/len(self.y_ground_truth)
         fig1.add_trace(
             go.Scatter(
                 x=[0,1],
@@ -262,10 +262,10 @@ class binary_classifier_tool:
         return fig
 
     def get_CM_metrics(self, threshold = 0.5):
-        TP_num = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == "1") & (self.auxilary_df["y_pred"] > threshold)].shape[0]
-        FP_num = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == "0") & (self.auxilary_df["y_pred"] > threshold)].shape[0]
-        TN_num = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == "0") & (self.auxilary_df["y_pred"] <= threshold)].shape[0]
-        FN_num = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == "1") & (self.auxilary_df["y_pred"] <= threshold)].shape[0]
+        TP_num = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == 1) & (self.auxilary_df["y_pred"] > threshold)].shape[0]
+        FP_num = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == 0) & (self.auxilary_df["y_pred"] > threshold)].shape[0]
+        TN_num = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == 0) & (self.auxilary_df["y_pred"] <= threshold)].shape[0]
+        FN_num = self.auxilary_df[(self.auxilary_df["y_ground_truth"] == 1) & (self.auxilary_df["y_pred"] <= threshold)].shape[0]
 
         precision = TP_num/(TP_num + FP_num) if (TP_num + FP_num) > 0  else 1
         recall_TPR = TP_num/(TP_num + FN_num) if (TP_num + FN_num) > 0 else 1
