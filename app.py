@@ -15,7 +15,12 @@ from libraries.models import knn
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn import svm
 from sklearn.utils import class_weight
+
+# from keras.models import Sequential
+# from keras.layers import Dense
+# import tensorflow as tf
 
 
 def main():
@@ -201,7 +206,21 @@ def main():
             knn_classifier = knn.KNearestNeighbor()
             knn_classifier.train(X_train.to_numpy(), y_train.to_numpy())
             dists = knn_classifier.compute_distances_no_loops(X_test.to_numpy())
-            y_pred = knn_classifier.predict_labels(dists, k=8)  
+            y_pred = knn_classifier.predict_labels(dists, k=8) 
+        elif classifier_name == "SVM":
+            svm_clf = svm.SVC(probability=True)
+            svm_clf.fit(X_train, y_train)
+            y_pred = svm_clf.predict_proba(X_test)[:, 1]
+            #print(y_pred.shape)
+        # elif classifier_name == "Neural Network":
+        #     model = Sequential() 
+        #     model.add(Dense(60, activation='relu', input_dim=2))
+        #     model.add(Dense(1, activation='sigmoid')) 
+        #     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy']) 
+
+        #     model.fit(X_train, y_train, epochs=20, batch_size=32)
+        #     y_pred = model.predict(X_test).ravel()
+        #     #print(y_pred.ravel())
 
         model_saved = st.button('Save Model?')
 

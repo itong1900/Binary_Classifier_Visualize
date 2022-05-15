@@ -62,7 +62,7 @@ class binary_classifier_tool:
 
     def plot_all_in_one_graph(self, threshold = 0.5):
         fig = make_subplots(rows=2, cols=1,
-                    row_heights=[0.2, 0.8],
+                    row_heights=[0.3, 0.7],
                     vertical_spacing = 0.02,
                     shared_yaxes=False,
                     shared_xaxes=True)
@@ -177,7 +177,7 @@ class binary_classifier_tool:
                 bargap=0,
                 bargroupgap = 0,
                 width=600,
-                height=650,
+                height=900,
                 legend=dict(orientation="v", yanchor="top", y = 0.98, xanchor="left", x= 0.99, font=dict(family="Courier",size=8,color="black"))
             )
 
